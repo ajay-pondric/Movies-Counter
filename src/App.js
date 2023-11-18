@@ -1,11 +1,12 @@
 import './App.css';
+import Body from './Components/Body';
 
 function App() {
   return (
     <div className="App">
-      <h3>Namaste Everyone, lets create Filmy God App with React .</h3>
+      <Body />
     </div>
   );
-}
+};
 
 export default App;

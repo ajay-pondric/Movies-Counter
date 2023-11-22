@@ -43,11 +43,24 @@ img{
   margin: 15px 0;
   border-radius: 4px;
 }
-button{
+login-button{
   margin: 24px 0;
   width: 100%;
 
 }
 .pointer{
   cursor: pointer;
+}
+.message{
+  color: red;
+}
+.nav{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px;
+}
+.user-icon{
+  max-width: 40px;
+  border-radius: 20px;
 }

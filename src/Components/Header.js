@@ -1,23 +1,52 @@
 import { Button, Col, Container, Row } from "react-bootstrap";
-import { APP_LOGO } from "../utils/Logo";
-import { signOut } from "firebase/auth";
+import { APP_LOGO, SUPPORTED_LANGUAGES, USER_AVATAR } from "../utils/constants";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { addUser, removeUser } from "../utils/userSlice";
+import { toggleGptSearchView } from "../utils/gptSlice";
+import { changeLanguage } from "../utils/configSlice";
 
 const Header = () => {
+  const dispatch = useDispatch();
   const user = useSelector(store => store.user);
+  const showGptSearch = useSelector((store) => store.gpt.showGptSearch)
   const navigate = useNavigate();
 
   const handleSignOut = () => {
     signOut(auth).then(() => {
-      navigate("/");
     }).catch((error) => {
       // An error happened.
     })
   }
 
-  return(
+  const handleLanguageChange = (e) => {
+    dispatch(changeLanguage(e.target.value));
+  }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+
+        const { uid, email, displayName, photoURL } = user;
+        dispatch(addUser({ uid: uid, email: email, displayName: displayName, photoURL: photoURL }));
+        navigate("/browse")
+      } else {
+        dispatch(removeUser());
+        navigate("/");
+      }
+    })
+    return () => unsubscribe();
+  }, []);
+
+  const handleSearchClick = () => {
+    dispatch(toggleGptSearchView());
+  }
+
+
+  return (
     <div className="header">
       <Container>
         <Row>
@@ -28,10 +57,14 @@ const Header = () => {
           </Col>
           <Col md={9} >
             {user && <div className="nav">
-            <div className="">
-              <img  className="user-icon" src="https://lh3.googleusercontent.com/pw/ADCreHdKzT3-adBMN4sOCOT4ghStGe1kYcACvdDIGujAyk2owW9THMhw5t4vw_S1rHOdxkJ59PPdOMmvsYsuqYYXlkD5ms2UE-ZlZEDONh1GRhTXOvcSklHneZ7A9z7EV7jZHnE16mfqJjvZeB0qrcp7hZtc=w693-h924-s-no-gm?authuser=0" alt="User Img" />
-            </div>
+              <Button className="search-button" onClick={handleSearchClick}>{showGptSearch ? "Home Page" : " GPTSearch"} </Button>
+              <div className="">
+                <img className="user-icon" src={USER_AVATAR} alt="User Img" />
+              </div>
               <Button onClick={handleSignOut}>Sign Out</Button>
+              {showGptSearch && <select className="select-language" onChange={handleLanguageChange}>
+                {SUPPORTED_LANGUAGES.map((lang) => <option key={lang.identifier} value={lang.identifier}>{lang.name}</option>)}
+              </select>}
             </div>}
           </Col>
         </Row>

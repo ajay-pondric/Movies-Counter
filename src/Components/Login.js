@@ -4,21 +4,19 @@ import { Button, Col, Container, Row } from 'react-bootstrap';
 import { checkValidate } from '../utils/Validate';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import {auth} from '../utils/firebase';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice';
+import { USER_AVATAR } from '../utils/constants';
 
 
 const Login = () => {
   const [singIn, setSignIn] = useState(true)
 const [errorMessage, setErrorMessage] = useState(null);
 const dispatch = useDispatch();
-const navigate = useNavigate();
 
   const name = useRef(null);
   const email =  useRef(null);
   const password = useRef(null);
-
   const checkValidValue = () => {
   
     const message = checkValidate(email.current.value, password.current.value);
@@ -31,19 +29,12 @@ const navigate = useNavigate();
     const user = userCredential.user;
     updateProfile(user,  {
       displayName: name.current.value, 
-      photoURL: "https://example.com/jane-q-user/profile.jpg"
+      photoURL: USER_AVATAR
     }).then(() => {
       const {uid, email, displayName, photoURL} = auth.currentUser;
       dispatch(addUser({uid: uid, email: email, displayName: displayName, photoURL: photoURL}))
-      navigate("/browse")
-      // Profile updated!
-      // ...
     }).catch((error) => {
-      // An error occurred
-      // ...
     })
-     navigate("/browse")
-     console.log(user);
   })
   .catch((error) => {
     const errorCode = error.code;
@@ -59,8 +50,6 @@ const navigate = useNavigate();
   .then((userCredential) => {
     // Signed in 
     const user = userCredential.user;
-    console.log(user);
-    navigate("/browse")
   })
   .catch((error) => {
     const errorCode = error.code;
